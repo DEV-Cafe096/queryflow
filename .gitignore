@@ -1,0 +1,10 @@
+parametros/arquivo.json
+materiais/agents_sql.pptx
+.env
+.python-version
+.DS_Store
+db/
+packages
+lib
+queryenv/
+
