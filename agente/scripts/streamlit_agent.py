@@ -84,10 +84,10 @@ def obter_estruturas_tabelas_cached(_mysql_host, _mysql_user, _mysql_password, _
 @st.cache_data
 def carregar_prompt_contexto_cached(): # Sua função
     try:
-        with open("../../protocolos/prompt.json", "r", encoding="utf-8") as f:
+        with open("/protocolos/prompt.json", "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        print("Alerta: Arquivo '../../protocolos/prompt.json' não encontrado. Usando prompt genérico.")
+        print("Alerta: Arquivo '/protocolos/prompt.json' não encontrado. Usando prompt genérico.")
         return {
             "model_role": "Você é um assistente SQL para o banco QueryFlow. Gere APENAS a query SQL (MySQL) sem explicações ou markdown.",
             "restricoes": ["Não use `SELECT *` a menos que explicitamente pedido."], "instrucoes_sql": []
@@ -216,8 +216,8 @@ if "resultados_db" not in st.session_state: st.session_state.resultados_db = []
 st.subheader("💡 Sugestões de Perguntas")
 sugestoes_cols = st.columns(4) 
 botoes_sugestao = {
-    "📋 Clientes": "Me mostre todos os clientes", "🏠 Endereços": "Quais são os endereços cadastrados",
-    "💸 Pagamentos Rec.": "Liste os últimos 5 pagamentos", "📈 Movim. Hoje": "Quais movimentações ocorreram hoje"
+    "📋 Clientes": "Me mostre todos os clientes", "🏠 Endereços": "Quais são os enderecos cadastrados",
+    "💸 Pagamentos Rec.": "Liste os últimos 5 pagamentos", "📈 Últimas movimentações": "Quais movimentações ocorreram"
 }
 for i, (texto_botao, pergunta_sugerida) in enumerate(botoes_sugestao.items()):
     if sugestoes_cols[i].button(texto_botao, key=f"btn_sug_{i}_main", use_container_width=True): 
