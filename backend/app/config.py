@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     gemini_api_key: str = ""
-    gemini_model_name: str = "gemini-2.5-flash"
+    gemini_model_name: str = "gemini-flash-latest"
     app_secret_key: str = ""
     app_store_path: str = "./app_store.db"
     max_result_rows: int = 500
