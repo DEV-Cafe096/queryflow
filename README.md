@@ -4,77 +4,79 @@
 </h1>
 
 <h3 align="center">QueryFlow: Seu Assistente Inteligente para Consultas SQL</h3>
-<p align="center">Transforme linguagem natural em consultas SQL com o poder da IA!</p>
-<p align="center">=================================</p>
+<p align="center">Transforme linguagem natural em consultas SQL, em qualquer banco de dados, com o poder da IA!</p>
 
-## 🚀 Visão Geral do Projeto
+## 🚀 Visão Geral
 
-O QueryFlow é uma aplicação web interativa que demonstra o poder dos agentes de Inteligência Artificial (IA) na tradução de perguntas em linguagem natural para consultas SQL. Utilizando a API do Google Gemini, o QueryFlow permite que usuários, mesmo sem conhecimento técnico em SQL, interajam com um banco de dados MySQL para obter informações valiosas.
-
-Este projeto foi desenvolvido como uma evolução, explorando como modelos de linguagem avançados podem facilitar o acesso e a manipulação de dados.
+QueryFlow é uma aplicação web que traduz perguntas em português para SQL usando o Gemini, e executa a consulta no banco de dados conectado. A partir desta versão, o projeto foi reescrito como uma aplicação web moderna (Next.js + FastAPI) com suporte a **qualquer banco de dados compatível com SQLAlchemy** — não apenas MySQL.
 
 ## ✨ Funcionalidades
 
-*   **Interface Web Intuitiva:** Desenvolvida com Streamlit para uma experiência de usuário amigável.
-*   **Tradução de Linguagem Natural para SQL:** Utilize a API do Google Gemini para converter suas perguntas em queries SQL.
-*   **Conexão com Banco de Dados MySQL:** Interaja diretamente com seu banco de dados MySQL local ou remoto.
-*   **Visualização de Resultados:** Veja os resultados das suas consultas diretamente na aplicação.
-*   **Configuração Segura:** Insira suas credenciais da API e do banco de dados através de uma interface segura.
-*   **Histórico de Interações (Opcional):** Capacidade de salvar perguntas, queries geradas e feedback para futuras análises (requer configuração da tabela de histórico).
+- **Interface web em Next.js**, com chat de perguntas, SQL gerado editável (com realce de sintaxe), tabela de resultados paginável e exportação em CSV.
+- **Qualquer banco de dados**: PostgreSQL, MySQL, SQLite, SQL Server ou qualquer outro dialeto suportado pelo SQLAlchemy (via URL de conexão bruta), tudo pela mesma interface — basta cadastrar a conexão.
+- **Geração de SQL com Gemini**, com o dialeto de destino informado ao modelo (a sintaxe muda entre bancos, ex. `LIMIT` vs `TOP`).
+- **Guardrails de segurança** aplicados no backend (não apenas pedidos por prompt): por padrão, apenas `SELECT` é permitido; `INSERT`/`UPDATE`/`DELETE` só funcionam se a conexão tiver "permitir escrita" habilitado, e `UPDATE`/`DELETE` sempre exigem `WHERE`. Resultados têm limite de linhas e timeout de execução.
+- **Histórico e feedback** de perguntas/consultas, armazenados localmente (não na base de dados do cliente).
+- **Credenciais cifradas** localmente quando uma conexão é salva.
 
-## 🏛️ Arquitetura Simplificada
+## 🏛️ Arquitetura
 
-A arquitetura do queryflow envolve:
+```
+frontend/   Next.js (App Router) + TypeScript + Tailwind + shadcn/ui
+backend/    FastAPI + SQLAlchemy (multi-dialeto) + Gemini
+banco_de_dados/  Gerador de dados fictícios (CSV) para popular um banco de demonstração
+```
 
-1.  **Interface do Usuário (Streamlit):** O usuário interage com a aplicação web, inserindo perguntas e configurando conexões.
-2.  **Agente de IA (Google Gemini):** A pergunta em linguagem natural, juntamente com o esquema do banco de dados, é enviada para a API do Gemini.
-3.  **Geração de SQL:** O Gemini processa a entrada e retorna uma query SQL correspondente.
-4.  **Banco de Dados (MySQL):** A query SQL gerada é executada no banco de dados MySQL configurado pelo usuário.
-5.  **Exibição de Resultados:** Os dados retornados pelo banco são exibidos na interface Streamlit.
+1. O usuário faz uma pergunta em português na interface web.
+2. O backend lê o schema do banco conectado via `sqlalchemy.inspect()` (funciona com qualquer dialeto).
+3. Pergunta + schema + dialeto de destino são enviados ao Gemini, que retorna o SQL.
+4. O SQL passa pelos guardrails de segurança antes de ser executado.
+5. Resultado é exibido na interface, com opção de editar o SQL manualmente antes de rodar novamente.
 
-*(Você pode adicionar uma nova imagem de arquitetura aqui se desejar, mostrando o fluxo com Streamlit e Gemini)*
-<!-- ![delta](img/nova_arquitetura_QueryFlow.png) -->
+## 🛠️ Como rodar localmente
 
-## 🛠️ Pré-requisitos e Configuração
+### Pré-requisitos
 
-Antes de começar, certifique-se de que você tem o seguinte:
+- Python 3.11+
+- Node.js 20+
+- Uma chave de API do [Google AI Studio](https://aistudio.google.com/) (Gemini)
 
-1.  **Python 3.8+**
-2.  **Servidor MySQL:** Instalado e rodando (localmente ou acessível remotamente).
-3.  **Chave de API do Google Gemini:**
-    *   Obtenha sua chave no [Google AI Studio](https://aistudio.google.com/).
-4.  **Git** (para clonar o repositório, se aplicável).
+### Backend
 
-### Passos para Instalação e Configuração:
+```bash
+cd backend
+python3 -m venv venv && source venv/bin/activate   # ou: uv venv && source venv/bin/activate
+pip install -r requirements.txt                    # ou: uv pip install -r requirements.txt --python venv/bin/python
 
-1.  **Clone o Repositório (se você estiver obtendo o código de um repositório git):**
-    ```bash
-    git clone [URL_DO_SEU_REPOSITORIO_AQUI]
-    cd QueryFlow # ou o nome da pasta do projeto
-    ```
+cp .env.example .env
+# edite .env e preencha GEMINI_API_KEY e APP_SECRET_KEY
+# gere uma APP_SECRET_KEY com: python -c "import secrets; print(secrets.token_urlsafe(32))"
 
-2.  **Crie e Ative um Ambiente Virtual Python (Recomendado):**
-    ```bash
-    python -m venv venv
-    # No Windows:
-    # venv\Scripts\activate
-    # No macOS/Linux:
-    # source venv/bin/activate
-    ```
+# opcional: cria um banco SQLite de demonstração a partir dos CSVs em banco_de_dados/datasets/
+python scripts/seed_sqlite_demo.py
 
-3.  **Instale as Dependências:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-    *(Certifique-se de que seu `requirements.txt` está atualizado com `streamlit`, `google-generativeai`, `mysql-connector-python`, `python-dotenv`)*
+uvicorn app.main:app --reload --port 8000
+```
 
-4.  **Configure as Variáveis de Ambiente:**
-    Crie um arquivo chamado `.env` na raiz do projeto e adicione suas credenciais:
-    ```env
-    GEMINI_API_KEY=SUA_CHAVE_API_GEMINI_AQUI
-    MYSQL_HOST=localhost
-    MYSQL_USER=seu_usuario_mysql
-    MYSQL_PASSWORD=sua_senha_mysql
-    MYSQL_DB=QueryFlow # Ou o nome do seu banco de dados
-    GEMINI_MODEL_NAME=gemini-1.5-flash-latest # Modelo Gemini padrão
-    ```
+A API sobe em `http://localhost:8000` (docs interativas em `/docs`).
+
+### Frontend
+
+```bash
+cd frontend
+cp .env.example .env.local   # NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+npm install
+npm run dev
+```
+
+Acesse `http://localhost:3000`, vá em **Conexões** e cadastre seu banco (ou aponte para `./demo.db` com dialeto SQLite, se você rodou o seed acima).
+
+### Populando um MySQL real (opcional)
+
+`banco_de_dados/scripts/create_table.py` continua disponível para quem quiser popular um MySQL com o mesmo conjunto de dados fictícios (usa as variáveis `MYSQL_*` do `.env` daquele diretório).
+
+## 🔒 Notas de segurança
+
+- Conexões novas nascem **somente leitura**; escrita precisa ser habilitada explicitamente por conexão.
+- A senha do banco nunca é enviada ao Gemini — apenas nomes/tipos de tabelas e colunas.
+- Histórico e credenciais salvas ficam num SQLite local do próprio app (`backend/app_store.db`), nunca dentro do banco de dados do cliente.

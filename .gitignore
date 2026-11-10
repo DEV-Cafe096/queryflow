@@ -1,10 +1,17 @@
-parametros/arquivo.json
-materiais/agents_sql.pptx
-.env
-.python-version
-.DS_Store
-db/
-packages
-lib
-queryenv/
+# Backend (Python)
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.env
+backend/app_store.db
+backend/demo.db
 
+# Frontend (Next.js)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+
+# General
+.DS_Store
+.python-version
